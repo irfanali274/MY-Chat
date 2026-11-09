@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Realtime Chat</title>
+    <style>
+        #chat { height: 300px; border: 1px solid #ccc; overflow-y: scroll; margin-bottom: 10px; }
+        .msg { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="chat"></div>
+<input type="text" id="name" placeholder="Enter your name">
+<input type="text" id="msg" placeholder="Type a message...">
+<button id="sendBtn">Send</button>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyD4UptSmKxvM5X9UX2xSaa_sfz7GgA0704",
+  authDomain: "my-chat-100dd.firebaseapp.com",
+  projectId: "my-chat-100dd",
+  storageBucket: "my-chat-100dd.firebasestorage.app",
+  messagingSenderId: "81736133294",
+  appId: "1:81736133294:web:008c9febe7e5d8d34c1b3f",
+  measurementId: "G-N1C8B5C5P2"
+};
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.addEventListener('click', async () => {
+        const name = document.getElementById('name').value;
+        const msg = document.getElementById('msg').value;
+        if (name && msg) {
+            await addDoc(collection(db, "messages"), {
+                name: name,
+                text: msg,
+                timestamp: Date.now()
+            });
+            document.getElementById('msg').value = '';
+        }
+    });
+
+    const q = query(collection(db, "messages"), orderBy("timestamp"));
+    onSnapshot(q, (snapshot) => {
+        let chat = document.getElementById('chat');
+        chat.innerHTML = '';
+        snapshot.forEach((doc) => {
+            let d = doc.data();
+            chat.innerHTML += `<div class="msg"><b>${d.name}:</b> ${d.text}</div>`;
+        });
+        chat.scrollTop = chat.scrollHeight;
+    });
+</script>
+
+</body>
+</html>
+
+
+
+
